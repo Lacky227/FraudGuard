@@ -28,6 +28,7 @@ public class DataProcessor {
 
             DataFrame normalizeData = normalizeFeatures(data);
         } catch (IOException | URISyntaxException e) {
+            log.error("Error loading data from file {}", csvPath, e);
             throw new RuntimeException(e);
         }
     }
