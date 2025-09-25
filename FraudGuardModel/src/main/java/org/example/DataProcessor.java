@@ -3,13 +3,16 @@ package org.example;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import smile.data.DataFrame;
+import smile.data.transform.InvertibleColumnTransform;
 import smile.data.type.DataTypes;
 import smile.data.type.StructField;
 import smile.data.type.StructType;
+import smile.feature.transform.Scaler;
 import smile.io.Read;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 
 @Slf4j
 public class DataProcessor {
@@ -22,6 +25,8 @@ public class DataProcessor {
             log.info("Loaded data from file {}", csvPath);
 
             analyzeClassDistribution(data);
+
+            DataFrame normalizeData = normalizeFeatures(data);
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -45,6 +50,18 @@ public class DataProcessor {
         log.info("  Fraudulent transactions: {} ({})",
                 fraudCount, String.format("%.2f%%", (fraudCount * 100.0) / data.size()));
         log.warn("  Imbalance ratio: 1:{}", String.format("%.0f", (double) normalCount / fraudCount));
+    }
+
+    private DataFrame normalizeFeatures(DataFrame data){
+        log.info("Normalizing features...");
+        String[] featureName = Arrays.stream(data.names())
+                .filter(name -> !name.equals("Class"))
+                .toArray(String[]::new);
+
+        InvertibleColumnTransform scaler = Scaler.fit(data, featureName);
+
+        log.info("Successfully: normalized features");
+        return scaler.apply(data);
     }
 
     private StructType getStructType(){
