@@ -50,6 +50,7 @@ public class DataProcessor {
         log.info("  Fraudulent transactions: {} ({})",
                 fraudCount, String.format("%.2f%%", (fraudCount * 100.0) / data.size()));
         log.warn("  Imbalance ratio: 1:{}", String.format("%.0f", (double) normalCount / fraudCount));
+        log.info("Successfully: processed data");
     }
 
     private DataFrame normalizeFeatures(DataFrame data){
