@@ -1,5 +1,6 @@
 package org.example;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import smile.data.DataFrame;
 import smile.data.type.DataTypes;
@@ -10,11 +11,15 @@ import smile.io.Read;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+@Slf4j
 public class DataProcessor {
 
     public void loadData(String csvPath) {
         try {
+            log.info("Loading data from file {}", csvPath);
             DataFrame data = Read.csv(csvPath, CSVFormat.DEFAULT.withFirstRecordAsHeader(), getStructType());
+            log.warn("Loaded {} rows and {} columns", data.nrow(),  data.ncol());
+            log.info("Loaded data from file {}", csvPath);
 
             analyzeClassDistribution(data);
         } catch (IOException | URISyntaxException e) {
@@ -34,12 +39,12 @@ public class DataProcessor {
                 normalCount++;
             }
         }
-        System.out.printf("Розподіл класів:\n");
-        System.out.printf("  Нормальні транзакції: %d (%.2f%%)\n",
-                normalCount, (normalCount * 100.0) / data.size());
-        System.out.printf("  Шахрайські транзакції: %d (%.2f%%)\n",
-                fraudCount, (fraudCount * 100.0) / data.size());
-        System.out.printf("  Дисбаланс: 1:%.0f\n", (double) normalCount / fraudCount);
+        log.info("Class distribution:");
+        log.info("  Normal transactions: {} ({})",
+                normalCount, String.format("%.2f%%", (normalCount * 100.0) / data.size()));
+        log.info("  Fraudulent transactions: {} ({})",
+                fraudCount, String.format("%.2f%%", (fraudCount * 100.0) / data.size()));
+        log.warn("  Imbalance ratio: 1:{}", String.format("%.0f", (double) normalCount / fraudCount));
     }
 
     private StructType getStructType(){
