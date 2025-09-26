@@ -12,10 +12,13 @@ import smile.io.Read;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
+import java.util.*;
 
 @Slf4j
 public class DataProcessor {
+
+    private static final double TRAIN_RATIO = 0.8;
+    private static final int RANDOM_SEED = 42;
 
     public void loadData(String csvPath) {
         try {
@@ -64,6 +67,43 @@ public class DataProcessor {
 
         log.info("Successfully: normalized features");
         return scaler.apply(data);
+    }
+
+    private record SplitData (DataFrame trainData, DataFrame testData){}
+
+    private SplitData splitData(DataFrame data){
+        log.info("Splitting into train ({}) / test ({}) ...",
+                String.format("%.0f%%", TRAIN_RATIO * 100),
+                String.format("%.0f%%", (1 - TRAIN_RATIO) * 100));
+        List<Integer> indexes = new ArrayList<>();
+        for (int i = 0; i < data.size(); i++) {
+            indexes.add(i);
+        }
+        Collections.shuffle(indexes, new Random(RANDOM_SEED));
+
+        int trainSize = (int) (data.size() * TRAIN_RATIO);
+
+        int[] trainIndexes = indexes.subList(0, trainSize).stream()
+                .mapToInt(Integer::intValue)
+                .toArray();
+        int[] testIndexes = indexes.subList(trainSize, indexes.size()).stream()
+                .mapToInt(Integer::intValue)
+                .toArray();
+
+        DataFrame trainData = data.select(trainIndexes);
+        DataFrame testData = data.select(testIndexes);
+
+        log.info("Check for class imbalance ...");
+        long trainFraud = trainData.stream()
+                .filter(row -> row.getDouble("Class") == 1.0).count();
+        if (trainFraud == 0){
+            log.warn("Warning: train dataset contains no FRAUD cases!");
+            log.warn("Fraud count: {}", trainFraud);
+        }
+
+        log.info("Successfully split data: train = {} rows, test = {} rows",
+                trainData.size(), testData.size());
+        return new SplitData(trainData, testData);
     }
 
     private StructType getStructType(){
