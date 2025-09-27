@@ -2,11 +2,13 @@ package org.example;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
+import org.example.utils.SMOTE;
 import smile.data.DataFrame;
 import smile.data.transform.InvertibleColumnTransform;
 import smile.data.type.DataTypes;
 import smile.data.type.StructField;
 import smile.data.type.StructType;
+import smile.data.vector.DoubleVector;
 import smile.feature.transform.Scaler;
 import smile.io.Read;
 
@@ -37,6 +39,7 @@ public class DataProcessor {
     }
 
     private void analyzeClassDistribution(DataFrame data){
+        log.info("Analyzing class-distribution");
         var classColumn = data.column("Class");
         long fraudCount = 0;
         long normalCount = 0;
@@ -104,6 +107,50 @@ public class DataProcessor {
         log.info("Successfully split data: train = {} rows, test = {} rows",
                 trainData.size(), testData.size());
         return new SplitData(trainData, testData);
+    }
+
+    private DataFrame balanceClasses(DataFrame trainData){
+        log.info("Balancing classes...");
+        try{
+            String[] featureName = Arrays.stream(trainData.names())
+                    .filter(name -> !name.equals("Class"))
+                    .toArray(String[]::new);
+
+            double[][] features = new double[trainData.size()][featureName.length];
+            int[] labels = new int[trainData.size()];
+
+            for (int i = 0; i < trainData.size(); i++) {
+                for (int j = 0; j < featureName.length; j++) {
+                    features[i][j] = trainData.column(featureName[j]).getDouble(i);
+                }
+                labels[i] = (int) trainData.column("Class").getDouble(i);
+            }
+
+            SMOTE<double[]> smote = new SMOTE<>();
+            var balancedData = smote.apply(features, labels);
+
+            double[][] balancedFeatures = balancedData.x;
+            int[] balancedLabels = balancedData.y;
+
+            var builder = DataFrame.of(balancedFeatures, featureName);
+
+            double[] classValues = Arrays.stream(balancedLabels)
+                    .asDoubleStream().toArray();
+            DataFrame classValuesData = new DataFrame(
+                    new DoubleVector("Class", classValues)
+            );
+
+            DataFrame balanced = builder.merge(classValuesData);
+
+            log.info("Successfully: balance classes");
+            log.warn("After balance classes : rows ({})", balanced.size());
+            analyzeClassDistribution(balanced);
+
+            return balanced;
+        } catch (Exception e){
+            log.error("Error while balance classes for {} rows", trainData.size(), e);
+            return trainData;
+        }
     }
 
     private StructType getStructType(){
