@@ -22,7 +22,9 @@ public class DataProcessor {
     private static final double TRAIN_RATIO = 0.8;
     private static final int RANDOM_SEED = 42;
 
-    public void loadData(String csvPath) {
+    public record ProcessedData(DataFrame trainData, DataFrame testData) {}
+
+    public ProcessedData loadData(String csvPath) {
         try {
             log.info("Loading data from file {}", csvPath);
             DataFrame data = Read.csv(csvPath, CSVFormat.DEFAULT.withFirstRecordAsHeader(), getStructType());
@@ -32,6 +34,12 @@ public class DataProcessor {
             analyzeClassDistribution(data);
 
             DataFrame normalizeData = normalizeFeatures(data);
+
+            var splitDataValues = splitData(normalizeData);
+
+            DataFrame balancedTrainData = balanceClasses(splitDataValues.trainData);
+
+            return new ProcessedData(balancedTrainData, splitDataValues.testData);
         } catch (IOException | URISyntaxException e) {
             log.error("Error loading data from file {}", csvPath, e);
             throw new RuntimeException(e);
