@@ -98,8 +98,8 @@ public class DataProcessor {
                 .filter(row -> row.getDouble("Class") == 1.0).count();
         if (trainFraud == 0){
             log.warn("Warning: train dataset contains no FRAUD cases!");
-            log.warn("Fraud count: {}", trainFraud);
         }
+        log.warn("Fraud count: {}", trainFraud);
 
         log.info("Successfully split data: train = {} rows, test = {} rows",
                 trainData.size(), testData.size());
