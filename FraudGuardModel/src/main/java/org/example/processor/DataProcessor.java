@@ -27,7 +27,7 @@ public class DataProcessor {
 
     public ProcessedData loadData(String csvPath) {
         try {
-            log.info("Loading data...");
+            log.info("Loaded data from file {}", csvPath);
 
             CSVFormat format = CSVFormat.Builder.create()
                     .setHeader()
@@ -36,7 +36,6 @@ public class DataProcessor {
 
             DataFrame data = Read.csv(csvPath, format, getStructType());
             log.warn("Loaded {} rows and {} columns", data.nrow(),  data.ncol());
-            log.info("Loaded data from file {}", csvPath);
 
             analyzeClassDistribution(data);
 
