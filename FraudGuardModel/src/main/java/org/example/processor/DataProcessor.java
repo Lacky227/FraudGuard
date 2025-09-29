@@ -27,7 +27,7 @@ public class DataProcessor {
 
     public ProcessedData loadData(String csvPath) {
         try {
-            log.info("Loading data from file {}", csvPath);
+            log.info("Loading data...");
 
             CSVFormat format = CSVFormat.Builder.create()
                     .setHeader()
