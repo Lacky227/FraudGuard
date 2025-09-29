@@ -11,6 +11,7 @@ import smile.data.type.StructType;
 import smile.data.vector.DoubleVector;
 import smile.feature.transform.Scaler;
 import smile.io.Read;
+import smile.util.Index;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -27,7 +28,13 @@ public class DataProcessor {
     public ProcessedData loadData(String csvPath) {
         try {
             log.info("Loading data from file {}", csvPath);
-            DataFrame data = Read.csv(csvPath, CSVFormat.DEFAULT.withFirstRecordAsHeader(), getStructType());
+
+            CSVFormat format = CSVFormat.Builder.create()
+                    .setHeader()
+                    .setSkipHeaderRecord(true)
+                    .build();
+
+            DataFrame data = Read.csv(csvPath, format, getStructType());
             log.warn("Loaded {} rows and {} columns", data.nrow(),  data.ncol());
             log.info("Loaded data from file {}", csvPath);
 
@@ -101,8 +108,8 @@ public class DataProcessor {
                 .mapToInt(Integer::intValue)
                 .toArray();
 
-        DataFrame trainData = data.select(trainIndexes);
-        DataFrame testData = data.select(testIndexes);
+        DataFrame trainData = data.get(Index.of(trainIndexes));
+        DataFrame testData = data.get(Index.of(testIndexes));
 
         log.info("Check for class imbalance ...");
         long trainFraud = trainData.stream()
