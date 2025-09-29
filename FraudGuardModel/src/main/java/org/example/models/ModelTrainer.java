@@ -1,4 +1,4 @@
-package org.example;
+package org.example.models;
 
 import smile.classification.Classifier;
 import smile.data.DataFrame;

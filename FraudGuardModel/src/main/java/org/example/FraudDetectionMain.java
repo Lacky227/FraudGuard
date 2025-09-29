@@ -1,6 +1,7 @@
 package org.example;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.processor.DataProcessor;
 import smile.data.DataFrame;
 
 @Slf4j
