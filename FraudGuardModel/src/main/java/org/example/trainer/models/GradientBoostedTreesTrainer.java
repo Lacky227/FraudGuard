@@ -84,7 +84,7 @@ public class GradientBoostedTreesTrainer implements ModelTrainer {
                                         GradientTreeBoost.fit(formula, trainData, options), formula, schema);
 
                                 double score = evaluateF1Score(model, validationFeatures, validationLabels);
-                                log.info("Trees: {}, MaxDepth: {}, NodeSize: {}, Shrinkage: {}, Subsample: {}, F1-Score: {:.4f}",
+                                log.info("Trees: {}, MaxDepth: {}, NodeSize: {}, Shrinkage: {}, Subsample: {}, F1-Score: {}",
                                         trees, depth, nodeSize, shrinkage, subsample, score);
 
                                 if (score > bestScore) {
@@ -108,7 +108,7 @@ public class GradientBoostedTreesTrainer implements ModelTrainer {
                     formula, schema);
         }
 
-        log.info("Best F1-Score: {:.4f}", bestScore);
+        log.info("Best F1-Score: {}", bestScore);
         return bestModel;
     }
 
