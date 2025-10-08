@@ -61,7 +61,7 @@ public class RandomForestTrainer implements ModelTrainer {
         double bestScore = Double.NEGATIVE_INFINITY;
 
         double[][] validationFeatures = formula.x(validationData).toArray();
-        int[] validationLabels = DataUtils.safeIntLabels(formula, trainData);
+        int[] validationLabels = DataUtils.safeIntLabels(formula, validationData);
 
         StructType schema = trainData.schema();
 
