@@ -8,7 +8,6 @@ import smile.data.transform.InvertibleColumnTransform;
 import smile.data.type.DataTypes;
 import smile.data.type.StructField;
 import smile.data.type.StructType;
-import smile.data.vector.DoubleVector;
 import smile.data.vector.IntVector;
 import smile.feature.transform.Scaler;
 import smile.io.Read;
@@ -37,13 +36,6 @@ public class DataProcessor {
 
             DataFrame data = Read.csv(csvPath, format, getStructType());
             log.warn("Loaded {} rows and {} columns", data.nrow(),  data.ncol());
-
-            if (!(data.column("Class") instanceof IntVector)){
-                double[] classValues = data.column("Class").toDoubleArray();
-                int[] classLabels = Arrays.stream(classValues).mapToInt(d -> (int) d).toArray();
-
-                data = data.drop("Class").set("Class", new IntVector("Class", classLabels));
-            }
 
             analyzeClassDistribution(data);
 
@@ -156,13 +148,9 @@ public class DataProcessor {
 
             var builder = DataFrame.of(balancedFeatures, featureName);
 
-            double[] classValues = Arrays.stream(balancedLabels)
-                    .asDoubleStream().toArray();
-            DataFrame classValuesData = new DataFrame(
-                    new DoubleVector("Class", classValues)
-            );
+            IntVector classVector = new IntVector("Class", balancedLabels);
 
-            DataFrame balanced = builder.merge(classValuesData);
+            DataFrame balanced = builder.set("Class", classVector);
 
             log.info("Successfully: balance classes");
             log.warn("After balance classes : rows ({})", balanced.size());
