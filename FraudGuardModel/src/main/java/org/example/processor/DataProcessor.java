@@ -9,6 +9,7 @@ import smile.data.type.DataTypes;
 import smile.data.type.StructField;
 import smile.data.type.StructType;
 import smile.data.vector.DoubleVector;
+import smile.data.vector.IntVector;
 import smile.feature.transform.Scaler;
 import smile.io.Read;
 import smile.util.Index;
@@ -36,6 +37,14 @@ public class DataProcessor {
 
             DataFrame data = Read.csv(csvPath, format, getStructType());
             log.warn("Loaded {} rows and {} columns", data.nrow(),  data.ncol());
+
+            if (!(data.column("Class") instanceof IntVector)){
+                double[] classValues = data.column("Class").toDoubleArray();
+                int[] classLabels = Arrays.stream(classValues).mapToInt(d -> (int) d).toArray();
+
+                DataFrame classDf = new DataFrame(new IntVector("Class", classLabels));
+                data = data.merge(classDf);
+            }
 
             analyzeClassDistribution(data);
 
