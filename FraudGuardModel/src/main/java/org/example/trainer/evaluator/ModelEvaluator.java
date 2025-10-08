@@ -1,9 +1,12 @@
 package org.example.trainer.evaluator;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.utils.DataUtils;
 import smile.classification.Classifier;
 import smile.data.DataFrame;
 import smile.data.formula.Formula;
+import smile.data.vector.IntVector;
+import smile.data.vector.ValueVector;
 import smile.validation.metric.AUC;
 import smile.validation.metric.Accuracy;
 
@@ -24,7 +27,7 @@ public class ModelEvaluator {
         Formula formula = Formula.lhs("Class");
 
         var features = formula.x(testData).toArray();
-        var actualLabels = formula.y(testData).toIntArray();
+        var actualLabels = DataUtils.safeIntLabels(formula, testData);
 
         int[] predictions = new int[features.length];
         double[] probabilities = new double[features.length];
@@ -35,7 +38,7 @@ public class ModelEvaluator {
             if (model.soft()) {
                 double[] posterior = new double[model.numClasses()];
                 model.predict(features[i], posterior);
-                probabilities[i] = posterior[1];
+                probabilities[i] = posterior.length > 1 ? posterior[1] : posterior[0];
             } else {
                 probabilities[i] = predictions[i];
             }
