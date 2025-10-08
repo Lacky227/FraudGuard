@@ -5,15 +5,18 @@ import org.example.processor.DataProcessor;
 import org.example.trainer.ModelTrainer;
 import org.example.trainer.evaluator.ModelEvaluator;
 import org.example.trainer.models.*;
+import org.example.utils.ModelPersistence;
 import smile.data.DataFrame;
 import smile.data.formula.Formula;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 public class FraudDetectionMain {
     private static final String DATASET_PATH = "/home/artur/IdeaProjects/FraudGuard/FraudGuardModel/src/main/resources/creditcard.csv";
+    private static final String MODEL_SAVE_PATH = "/home/artur/IdeaProjects/FraudGuard/FraudGuardModel/best_fraud_model";
 
     public static void main(String[] args) {
         log.info("Loading and processing data...");
@@ -23,8 +26,8 @@ public class FraudDetectionMain {
         DataFrame trainData = processedData.trainData();
         DataFrame testData = processedData.testData();
 
-        log.info("Size training data: rows ({})", trainData.size());
-        log.info("Size testing data: rows ({})", testData.size());
+        log.info("Training data size: {} rows", trainData.size());
+        log.info("Testing data size: {} rows", testData.size());
 
         log.info("Preparing models...");
         Map<String, ModelTrainer> models = prepareModels();
@@ -70,7 +73,50 @@ public class FraudDetectionMain {
         log.info("Results after optimization:");
         log.info("F1-Score: {} (was {})", optimizedResult.f1Score(), bestModelResult.f1Score());
         log.info("ROC-AUC: {} (was {})", optimizedResult.rocAuc(), bestModelResult.rocAuc());
+        log.info("=".repeat(80));
+
+        try {
+            log.info("Saving model...");
+            ModelPersistence.saveModel(optimizedModel, MODEL_SAVE_PATH);
+            log.info("Model saved successfully: {}", MODEL_SAVE_PATH);
+
+            log.info("Verifying model loading...");
+            var loadedModel = ModelPersistence.loadModel(MODEL_SAVE_PATH);
+            var loadedResult = evaluator.evaluate(loadedModel, testData, bestModelName + " (Loaded)");
+            log.info("Loaded model F1-Score: {} (was {})", loadedResult.f1Score(), bestModelResult.f1Score());
+        } catch (IOException e) {
+            log.error("Failed to save model", e);
+            throw new RuntimeException(e);
+        }
+
+        log.info("=".repeat(80));
+        System.out.println("FINAL REPORT");
+        System.out.println("=".repeat(80));
+        System.out.println("Best model: " + bestModelName);
+        System.out.printf("Accuracy: %.4f%n", optimizedResult.accuracy());
+        System.out.printf("Precision: %.4f%n", optimizedResult.precision());
+        System.out.printf("Recall: %.4f%n", optimizedResult.recall());
+        System.out.printf("F1-Score: %.4f%n", optimizedResult.f1Score());
+        System.out.printf("ROC-AUC: %.4f%n", optimizedResult.rocAuc());
+
+        System.out.println("\nRecommendations:");
+        if (optimizedResult.f1Score() > 0.85) {
+            System.out.println("The model shows excellent performance.");
+        } else if (optimizedResult.f1Score() > 0.75) {
+            System.out.println("The model shows good performance.");
+        } else {
+            System.out.println("! The model requires further tuning.");
+        }
+
+        if (optimizedResult.recall() < 0.8) {
+            System.out.println("! Low recall — some fraudulent transactions may be missed.");
+        }
+
+        if (optimizedResult.precision() < 0.8) {
+            System.out.println("! Low precision — too many legitimate transactions may be flagged as fraud.");
+        }
     }
+
     private static Map<String, ModelTrainer> prepareModels() {
         Map<String, ModelTrainer> models = new HashMap<>();
 
