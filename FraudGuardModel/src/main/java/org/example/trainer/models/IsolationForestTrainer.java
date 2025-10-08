@@ -2,6 +2,7 @@ package org.example.trainer.models;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.trainer.ModelTrainer;
+import org.example.utils.DataUtils;
 import smile.anomaly.IsolationForest;
 import smile.classification.Classifier;
 import smile.data.DataFrame;
@@ -75,7 +76,7 @@ public class IsolationForestTrainer implements ModelTrainer {
 
         double[][] trainFeatures = formula.x(trainData).toArray();
         double[][] validationFeatures = formula.x(validationData).toArray();
-        int[] validationLabels = formula.y(validationData).toIntArray();
+        int[] validationLabels = DataUtils.safeIntLabels(formula, validationData);
 
         StructType schema = trainData.schema();
 

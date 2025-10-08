@@ -2,6 +2,7 @@ package org.example.trainer.models;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.trainer.ModelTrainer;
+import org.example.utils.DataUtils;
 import smile.classification.Classifier;
 import smile.classification.RandomForest;
 import smile.data.DataFrame;
@@ -60,7 +61,7 @@ public class RandomForestTrainer implements ModelTrainer {
         double bestScore = Double.NEGATIVE_INFINITY;
 
         double[][] validationFeatures = formula.x(validationData).toArray();
-        int[] validationLabels = formula.y(validationData).toIntArray();
+        int[] validationLabels = DataUtils.safeIntLabels(formula, trainData);
 
         StructType schema = trainData.schema();
 

@@ -2,6 +2,7 @@ package org.example.trainer.models;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.trainer.ModelTrainer;
+import org.example.utils.DataUtils;
 import smile.classification.Classifier;
 import smile.classification.GradientTreeBoost;
 import smile.data.DataFrame;
@@ -69,7 +70,7 @@ public class GradientBoostedTreesTrainer implements ModelTrainer {
         double bestScore = Double.NEGATIVE_INFINITY;
 
         double[][] validationFeatures = formula.x(validationData).toArray();
-        int[] validationLabels = formula.y(validationData).toIntArray();
+        int[] validationLabels = DataUtils.safeIntLabels(formula, validationData);
 
         StructType schema = trainData.schema();
 

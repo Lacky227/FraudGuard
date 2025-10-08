@@ -2,6 +2,7 @@ package org.example.trainer.models;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.trainer.ModelTrainer;
+import org.example.utils.DataUtils;
 import smile.classification.Classifier;
 import smile.classification.LogisticRegression;
 import smile.data.DataFrame;
@@ -41,7 +42,7 @@ public class LogisticRegressionTrainer implements ModelTrainer {
         int[] validationLabels = formula.y(validationData).toIntArray();
 
         double[][] trainFeatures = formula.x(trainData).toArray();
-        int[] trainLabels = formula.y(trainData).toIntArray();
+        int[] trainLabels = DataUtils.safeIntLabels(formula, trainData);
 
         for (double lambda : lambdaValues) {
             for (double tol : tolerances) {

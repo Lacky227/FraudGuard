@@ -2,6 +2,7 @@ package org.example.trainer.models;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.trainer.ModelTrainer;
+import org.example.utils.DataUtils;
 import smile.classification.Classifier;
 import smile.classification.KNN;
 import smile.data.DataFrame;
@@ -34,7 +35,7 @@ public class KNNTrainer implements ModelTrainer {
         var validationLabels = formula.y(validationData).toIntArray();
 
         var trainFeatures = formula.x(trainData).toArray();
-        var trainLabels = formula.y(trainData).toIntArray();
+        var trainLabels = DataUtils.safeIntLabels(formula, trainData);
 
         for (int k : kValues) {
             try {
