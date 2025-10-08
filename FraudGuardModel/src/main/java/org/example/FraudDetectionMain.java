@@ -16,7 +16,7 @@ import java.util.Map;
 @Slf4j
 public class FraudDetectionMain {
     private static final String DATASET_PATH = "/home/artur/IdeaProjects/FraudGuard/FraudGuardModel/src/main/resources/creditcard.csv";
-    private static final String MODEL_SAVE_PATH = "/home/artur/IdeaProjects/FraudGuard/FraudGuardModel/best_fraud_model";
+    private static final String MODEL_SAVE_PATH = "/home/artur/IdeaProjects/FraudGuard/FraudGuardModel/best_fraud_model.bin";
 
     public static void main(String[] args) {
         log.info("Loading and processing data...");
