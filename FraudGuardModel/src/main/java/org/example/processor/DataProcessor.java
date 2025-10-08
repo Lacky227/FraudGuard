@@ -42,8 +42,7 @@ public class DataProcessor {
                 double[] classValues = data.column("Class").toDoubleArray();
                 int[] classLabels = Arrays.stream(classValues).mapToInt(d -> (int) d).toArray();
 
-                DataFrame classDf = new DataFrame(new IntVector("Class", classLabels));
-                data = data.merge(classDf);
+                data = data.drop("Class").set("Class", new IntVector("Class", classLabels));
             }
 
             analyzeClassDistribution(data);
