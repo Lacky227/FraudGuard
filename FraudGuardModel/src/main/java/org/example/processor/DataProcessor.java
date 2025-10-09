@@ -1,5 +1,6 @@
 package org.example.processor;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.example.utils.SMOTE;
@@ -18,12 +19,13 @@ import java.net.URISyntaxException;
 import java.util.*;
 
 @Slf4j
+@Getter
 public class DataProcessor {
 
     private static final double TRAIN_RATIO = 0.8;
     private static final int RANDOM_SEED = 42;
 
-    public record ProcessedData(DataFrame trainData, DataFrame testData) {}
+    public record ProcessedData(DataFrame trainData, DataFrame testData, InvertibleColumnTransform scaler) {}
 
     public ProcessedData loadData(String csvPath) {
         try {
@@ -45,7 +47,7 @@ public class DataProcessor {
 
             DataFrame balancedTrainData = balanceClasses(splitDataValues.trainData);
 
-            return new ProcessedData(balancedTrainData, splitDataValues.testData);
+            return new ProcessedData(balancedTrainData, splitDataValues.testData, scaler);
         } catch (IOException | URISyntaxException e) {
             log.error("Error loading data from file {}", csvPath, e);
             throw new RuntimeException(e);
@@ -74,13 +76,14 @@ public class DataProcessor {
         log.info("Successfully: processed data");
     }
 
+    private InvertibleColumnTransform scaler;
     private DataFrame normalizeFeatures(DataFrame data){
         log.info("Normalizing features...");
         String[] featureName = Arrays.stream(data.names())
                 .filter(name -> !name.equals("Class"))
                 .toArray(String[]::new);
 
-        InvertibleColumnTransform scaler = Scaler.fit(data, featureName);
+        this.scaler = Scaler.fit(data, featureName);
 
         log.info("Successfully: normalized features");
         return scaler.apply(data);

@@ -77,7 +77,7 @@ public class FraudDetectionMain {
 
         try {
             log.info("Saving model...");
-            ModelPersistence.saveModel(optimizedModel, MODEL_SAVE_PATH);
+            ModelPersistence.saveModel(new ModelWithScaler(optimizedModel, processedData.scaler()), MODEL_SAVE_PATH);
             log.info("Model saved successfully: {}", MODEL_SAVE_PATH);
 
             log.info("Verifying model loading...");
