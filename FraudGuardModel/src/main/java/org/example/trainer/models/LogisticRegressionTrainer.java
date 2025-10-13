@@ -39,7 +39,7 @@ public class LogisticRegressionTrainer implements ModelTrainer {
         double bestScore = Double.NEGATIVE_INFINITY;
 
         double[][] validationFeatures = formula.x(validationData).toArray();
-        int[] validationLabels = formula.y(validationData).toIntArray();
+        int[] validationLabels = DataUtils.safeIntLabels(formula, validationData);
 
         double[][] trainFeatures = formula.x(trainData).toArray();
         int[] trainLabels = DataUtils.safeIntLabels(formula, trainData);

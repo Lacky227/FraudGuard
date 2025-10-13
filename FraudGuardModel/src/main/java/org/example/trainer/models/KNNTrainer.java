@@ -32,7 +32,7 @@ public class KNNTrainer implements ModelTrainer {
         double bestScore = Double.NEGATIVE_INFINITY;
 
         var validationFeatures = formula.x(validationData).toArray();
-        var validationLabels = formula.y(validationData).toIntArray();
+        var validationLabels = DataUtils.safeIntLabels(formula, validationData);
 
         var trainFeatures = formula.x(trainData).toArray();
         var trainLabels = DataUtils.safeIntLabels(formula, trainData);
